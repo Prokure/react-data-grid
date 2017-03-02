@@ -11,6 +11,10 @@ let optionPropType = React.PropTypes.shape({
 
 const AutoCompleteEditor = React.createClass({
 
+  getInitialState: function getInitialState(){
+    return { mount: true };
+  },
+
   propTypes: {
     onCommit: React.PropTypes.func,
     options: React.PropTypes.arrayOf(optionPropType),
@@ -23,7 +27,23 @@ const AutoCompleteEditor = React.createClass({
     search: React.PropTypes.string,
     onKeyDown: React.PropTypes.func,
     onFocus: React.PropTypes.func,
-    editorDisplayValue: React.PropTypes.func
+    editorDisplayValue: React.PropTypes.func,
+    parent: React.PropTypes.object,
+		reMount: React.PropTypes.func
+  },
+
+  componentWillMount: function componentWillMount(){
+    // console.log("inside componentDidMount of Autocomplete editor", this.props);
+    if(this.props.parent){
+      if( this.props.rowData[Object.keys(this.props.parent)[0]] === Object.values(this.props.parent)[0] ){
+        // console.log("Options are consistent");
+      }
+      else{
+        this.setState({mount: false});
+        this.props.reMount(this.props.rowData.id, this.props.rowData[Object.keys(this.props.parent)[0]]);
+      }
+    }
+
   },
 
   getDefaultProps(): {resultIdentifier: string} {
@@ -99,9 +119,16 @@ const AutoCompleteEditor = React.createClass({
 
   render(): ?ReactElement {
     let label = this.props.label != null ? this.props.label : 'title';
-    return (<div height={this.props.height} onKeyDown={this.props.onKeyDown}>
+    if(this.state.mount){
+          return (<div height={this.props.height} onKeyDown={this.props.onKeyDown}>
       <ReactAutocomplete search={this.props.search} ref="autoComplete" label={label} onChange={this.handleChange} onFocus={this.props.onFocus} resultIdentifier={this.props.resultIdentifier} options={this.props.options} value={this.getEditorDisplayValue()} />
       </div>);
+    }
+    else{
+          return (<div height={this.props.height} onKeyDown={this.props.onKeyDown}>
+      <ReactAutocomplete search={this.props.search} ref="autoComplete" label={label} onChange={this.handleChange} onFocus={this.props.onFocus} resultIdentifier={this.props.resultIdentifier} options={[]} value={this.getEditorDisplayValue()} />
+      </div>);
+    }  
   }
 });
 

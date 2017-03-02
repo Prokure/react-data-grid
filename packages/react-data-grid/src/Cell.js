@@ -16,6 +16,11 @@ const knownDivPropertyKeys = ['height', 'tabIndex', 'value'];
 
 const Cell = React.createClass({
 
+  contextTypes: {
+    popEditor: React.PropTypes.string,
+    setPopEditor: React.PropTypes.func
+  },
+
   propTypes: {
     rowIdx: React.PropTypes.number.isRequired,
     idx: React.PropTypes.number.isRequired,
@@ -57,8 +62,15 @@ const Cell = React.createClass({
     };
   },
 
+  checkPopEditor() {
+    if (this.props.rowIdx === this.context.popEditor.split('-')[0] && this.props.idx === this.context.popEditor.split('-')[1]) {
+      this.onCellDoubleClick
+    }
+  },
+
   componentDidMount() {
     this.checkFocus();
+    this.checkPopEditor();
   },
 
   componentWillReceiveProps(nextProps) {
@@ -69,6 +81,7 @@ const Cell = React.createClass({
 
   componentDidUpdate() {
     this.checkFocus();
+    this.checkPopEditor();
     let dragged = this.props.cellMetaData.dragged;
     if (dragged && dragged.complete === true) {
       this.props.cellMetaData.handleTerminateDrag();
@@ -101,6 +114,7 @@ const Cell = React.createClass({
     if (meta != null && meta.onCellClick && typeof (meta.onCellClick) === 'function') {
       meta.onCellClick({ rowIdx: this.props.rowIdx, idx: this.props.idx }, e);
     }
+    this.context.setPopEditor('');
   },
 
   onCellContextMenu() {
@@ -473,13 +487,13 @@ const Cell = React.createClass({
 
     let dragHandle = (!this.isActive() && ColumnUtils.canEdit(this.props.column, this.props.rowData, this.props.cellMetaData.enableCellSelect)) ? <div className="drag-handle" draggable="true" onDoubleClick={this.onDragHandleDoubleClick}><span style={{ display: 'none' }}></span></div> : null;
     let events = this.getEvents();
-    const tooltip = this.props.tooltip ? (<span className="cell-tooltip-text">{ this.props.tooltip }</span>) : null;
+    const tooltip = this.props.tooltip ? (<span className="cell-tooltip-text">{this.props.tooltip}</span>) : null;
 
     return (
       <div {...this.getKnownDivProps() } className={className} style={style} {...events}>
         {cellContent}
         {dragHandle}
-        { tooltip }
+        {tooltip}
       </div>
     );
   }
