@@ -39,6 +39,9 @@ const AutoCompleteEditor = React.createClass({
         // console.log("Options are consistent");
       }
       else{
+        if(!this.props.rowData[Object.keys(this.props.parent)[0]]){ //Check if the parent exists in the table or not (may exist in step 2)
+            return null;
+        } 
         this.setState({mount: false});
         this.props.reMount(this.props.rowData.id, this.props.rowData[Object.keys(this.props.parent)[0]]);
       }
